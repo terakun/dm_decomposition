@@ -1,4 +1,6 @@
 #include <iostream>
+#include <fstream>
+#include <algorithm>
 #include <Eigen/Sparse>
 #include <Eigen/Dense>
 #include <random>
@@ -7,34 +9,33 @@
 
 int main(){
   int rows = 5 , cols = 5;
+  std::ifstream ifs("./data.txt");
+  ifs >> rows >> cols;
   Eigen::SparseMatrix<double> A(rows,cols);
-  int elemsize = 10; // 成分の数
-  std::vector<Eigen::Triplet<double> > t(elemsize);
+  std::vector<Eigen::Triplet<double> > t;
 
   std::random_device rnd;
   std::mt19937 mt(rnd());
+  std::vector<int> shuffled_rows(rows),shuffled_cols(cols);
+  for(int r=0;r<rows;++r) shuffled_rows[r]=r;
+  std::shuffle(shuffled_rows.begin(),shuffled_rows.end(),mt);
+  for(int c=0;c<cols;++c) shuffled_cols[c]=c;
+  std::shuffle(shuffled_cols.begin(),shuffled_cols.end(),mt);
 
-  std::uniform_int_distribution<> row_dist(0,rows-1);
-  std::uniform_int_distribution<> col_dist(0,cols-1);
-  std::uniform_real_distribution<> dist(1,2);
-  std::uniform_int_distribution<> int_dist(1,5);
-  for(int i=0;i<elemsize;++i){
-    t[i] = Eigen::Triplet<double>(row_dist(mt),col_dist(mt),int_dist(mt));
+  for(int i=0;i<rows;++i){
+    for(int j=0;j<cols;++j){
+      double a;
+      ifs >> a;
+      if(a!=0){
+        t.emplace_back(shuffled_rows[i],shuffled_cols[j],a);
+      }
+    }
   }
 
   A.setFromTriplets(t.begin(),t.end());
 
-  for(int i=0;i<A.outerSize();++i){
-    for(Eigen::SparseMatrix<double>
-        ::InnerIterator it(A,i);it;++it){
-      std::cout << it.value() <<",";
-      std::cout << it.row() <<",";//SVector にはない
-      std::cout << it.col() <<",";//SVector にはない
-      std::cout << it.index() << std::endl;
-    }
-  }
-
   Eigen::MatrixXd dmat = Eigen::MatrixXd(A);
+  std::cout << "original matrix:" << std::endl;
   std::cout << dmat << std::endl;
 
   dm_decomposition dm;

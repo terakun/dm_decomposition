@@ -56,7 +56,7 @@ void dm_decomposition::operator()(const Eigen::SparseMatrix<double> &A){
   // 完全マッチングの部分は無向辺にする
   for(const auto &e : edges){
     if(e.first!=src_node&&e.second!=sink_node){
-      std::cout << e.first << " " << e.second-n << std::endl;
+      // std::cout << e.first << " " << e.second-n << std::endl;
       graph[e.second].push_back(e.first);
     }
   }
@@ -68,29 +68,45 @@ void dm_decomposition::operator()(const Eigen::SparseMatrix<double> &A){
  
   Eigen::MatrixXd mat_dense = Eigen::MatrixXd(mat_);
 
-  std::cout << "   " ;
+  std::cout << "strongly connected component:" << std::endl;
+  std::cout << "    " ;
   for(int j=0;j<n;++j){
     std::cout << std::setw(3) << labels[j+n];
   }
   std::cout << std::endl;
+  std::cout << "    " ;
+  for(int j=0;j<n;++j){
+    std::cout << "---";
+  }
+  std::cout << std::endl;
 
   for(int i=0;i<n;++i){
-    std::cout << std::setw(3) << labels[i];
+    std::cout << std::setw(3) << labels[i] <<":";
     for(int j=0;j<n;++j){
       std::cout << std::setw(3) << mat_dense(i,j);
     }
     std::cout << std::endl;
   }
 
-/*
-  std::vector<std::pair<int,int>> idx_and_labels;
-  for(int i=0;i<labels.size();++i){
-    idx_and_labels.emplace_back(i,labels[i]);
+  std::vector<std::pair<int,int>> label_and_rowidx;
+  std::vector<std::pair<int,int>> label_and_colidx;
+  for(int i=0;i<n;++i){
+    label_and_rowidx.emplace_back(labels[i],i);
   }
-  std::sort(idx_and_labels.begin(),idx_and_labels.end());
-
-  std::cout << "Blocked upper triangle matrix : " << std::endl;*/
+  std::sort(label_and_rowidx.begin(),label_and_rowidx.end());
+  for(int j=0;j<n;++j){
+    label_and_colidx.emplace_back(labels[j+n],j);
+  }
+  std::sort(label_and_colidx.begin(),label_and_colidx.end());
+  
   // ブロック上三角行列に分解する
+  std::cout << "block upper triangular matrix: " << std::endl;
+  for(int i=0;i<n;++i){
+    for(int j=0;j<n;++j){
+      std::cout << std::setw(3) << mat_dense(label_and_rowidx[i].second,label_and_colidx[j].second);
+    }
+    std::cout << std::endl;
+  }
 }
 
 bool bipartite_matching::dfs(const Graph &g,int v){
