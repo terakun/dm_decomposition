@@ -32,8 +32,6 @@ class dm_decomposition{
 
   public:
   void operator()(const Eigen::SparseMatrix<double> &A);
-  void solve(const Eigen::VectorXd &b,Eigen::VectorXd &x);
-  void gaussian_elimination(const Eigen::MatrixXd &A,const Eigen::VectorXd &b,Eigen::VectorXd &x);
 };
 
 #endif

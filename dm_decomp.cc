@@ -47,7 +47,7 @@ void dm_decomposition::operator()(const Eigen::SparseMatrix<double> &A){
   std::vector<Edge> edges;
   bm(flow,n,edges);
 
-   // 完全マッチングでなければ終了（解が一意に定まらない）
+   // 完全マッチングでなければ終了
   if(edges.size() != row_nodes.size()){
     std::cout << "Incomplete matching!" << std::endl;
     return ;
@@ -56,7 +56,6 @@ void dm_decomposition::operator()(const Eigen::SparseMatrix<double> &A){
   // 完全マッチングの部分は無向辺にする
   for(const auto &e : edges){
     if(e.first!=src_node&&e.second!=sink_node){
-      // std::cout << e.first << " " << e.second-n << std::endl;
       graph[e.second].push_back(e.first);
     }
   }
@@ -68,7 +67,7 @@ void dm_decomposition::operator()(const Eigen::SparseMatrix<double> &A){
  
   Eigen::MatrixXd mat_dense = Eigen::MatrixXd(mat_);
 
-  std::cout << "strongly connected component:" << std::endl;
+  std::cout << "strongly connected components:" << std::endl;
   std::cout << "    " ;
   for(int j=0;j<n;++j){
     std::cout << std::setw(3) << labels[j+n];
@@ -100,7 +99,7 @@ void dm_decomposition::operator()(const Eigen::SparseMatrix<double> &A){
   std::sort(label_and_colidx.begin(),label_and_colidx.end());
   
   // ブロック上三角行列に分解する
-  std::cout << "block upper triangular matrix: " << std::endl;
+  std::cout << "upper triangular block matrix: " << std::endl;
   for(int i=0;i<n;++i){
     for(int j=0;j<n;++j){
       std::cout << std::setw(3) << mat_dense(label_and_rowidx[i].second,label_and_colidx[j].second);
@@ -183,6 +182,3 @@ void strong_connection_components::rdfs(const Graph &rev_g,int i,int l,std::vect
   }
 }
 
-void dm_decomposition::solve(const Eigen::VectorXd &b,Eigen::VectorXd &x){
-
-}
